@@ -41,9 +41,9 @@ int main(void)
     hw.Configure();
     hw.Init();
     InitGPIO();
-    //MidiUsbHandler::Config midi_cfg;
-    //midi.Init(midi_cfg);
-    hw.StartLog(false);
+    MidiUsbHandler::Config midi_cfg;
+    midi.Init(midi_cfg);
+    //hw.StartLog(false);
 
     uint8_t button_cnt = 0;
     float   pot_value = 0;
@@ -61,7 +61,7 @@ int main(void)
         bool current_button_state = button.Read();
         if (current_button_state == false && last_button_state == true) {
             button_cnt++;
-            hw.PrintLine("Setup Phase: %d", button_cnt);
+            //hw.PrintLine("Setup Phase: %d", button_cnt);
             hw.DelayMs(50); 
         }
         last_button_state = current_button_state;
@@ -79,9 +79,9 @@ int main(void)
 
         if (button_cnt == 0) {
             // Intorno State
-            intorno =  (pot_value / 65535.0f) * 500.0f;
-            hw.PrintLine("Setup INTORNO: %f| ", intorno);
-            hw.PrintLine("LDR mean: %f", ldr_mean);
+            intorno =  (pot_value / 65535.0f) * 3000.0f;
+            //hw.PrintLine("Setup INTORNO: %f| ", intorno);
+            //hw.PrintLine("LDR mean: %f", ldr_mean);
             if (intorno < ldr_mean){
                 for(int i=0; i<6; i++) leds[i].Write(true);
             } else {
@@ -92,7 +92,7 @@ int main(void)
         else if (button_cnt >= 1 && button_cnt <= 6) {
             // Calibrazione singola soglia LDR
             int i = button_cnt - 1;
-            thresholds[i] = intorno  + (pot_value / 65535.0f) * 150.0f;
+            thresholds[i] = intorno  + (pot_value / 65535.0f) * 500.0f;
             
             if (ldr[i] + 20 > thresholds[i]) {
                 leds[i].Write(false);
@@ -100,14 +100,14 @@ int main(void)
                 leds[i].Write(true);
             }
             
-            hw.PrintLine("Setup LDR %d - Soglia: %f - value: %f", i, thresholds[i], ldr[i]);
+            //hw.PrintLine("Setup LDR %d - Soglia: %f - value: %f", i, thresholds[i], ldr[i]);
         }
         
         hw.DelayMs(50);
     }
 
     // --- PLAY MODE (Loop infinito) ---
-    hw.PrintLine("Setup completato. Entro in PLAY MODE.");
+    //hw.PrintLine("Setup completato. Entro in PLAY MODE.");
     for(int i=0; i<6; i++) leds[i].Write(false);
  
     bool is_playing[LDR_NUM] = {false}; 
@@ -119,27 +119,28 @@ int main(void)
             
             System::DelayUs(50); 
 
-            // 2. Tocco rilevato E la nota NON stava già suonando
+            // 1. Tocco rilevato (Fronte di salita -> NOTE ON)
             if (ldr[i] > thresholds[i] && is_playing[i] == false) {
                 
                 is_playing[i] = true; 
                 
                 leds[i].Write(true);
-                //midi.SendNoteOn(0, V0 + i, 100);
+              
+                 midi.SendNoteOn(0, V0 + i, 100); 
                 
-                hw.DelayMs(100); // Durata della nota
                 
-                //midi.SendNoteOff(0, V0 + i, 0);
-                leds[i].Write(false);
             }
             else if (ldr[i] < (thresholds[i] - 15) && is_playing[i] == true) {
                 
-                is_playing[i] = false; // Riattiva il sensore per il prossimo tocco
+                is_playing[i] = false; 
                 
+                leds[i].Write(false);
+         
+                 midi.SendNoteOff(0, V0 + i, 0);
             }
         }
         
-        // Un delay minimo per non saturare la CPU, ma mantenere reattività
+        // Un delay minimo per non saturare la CPU
         hw.DelayMs(10); 
     }
 }
