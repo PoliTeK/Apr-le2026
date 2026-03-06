@@ -1,0 +1,3 @@
+CC tra DGND e AGND
+
+Alimentazione Pot a DVDD invece che AVDD
