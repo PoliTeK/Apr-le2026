@@ -41,8 +41,8 @@ int main(void)
     hw.Configure();
     hw.Init();
     InitGPIO();
-    MidiUsbHandler::Config midi_cfg;
-    midi.Init(midi_cfg);
+    //MidiUsbHandler::Config midi_cfg;
+    //midi.Init(midi_cfg);
     //hw.StartLog(false);
 
     uint8_t button_cnt = 0;
@@ -71,7 +71,7 @@ int main(void)
             ldr[i] = hw.adc.Get(i);
             System::DelayUs(50); 
         }
-        //ldr_mean = (ldr[0] + ldr[1] + ldr[2] + ldr[3] + ldr[4] + ldr[5]) / LDR_NUM;
+        ldr_mean = (ldr[0] + ldr[1] + ldr[2] + ldr[3] + ldr[4] + ldr[5]) / LDR_NUM;
         ldr_mean = (ldr[4] + ldr[5]) / 2.0f;
   
       
