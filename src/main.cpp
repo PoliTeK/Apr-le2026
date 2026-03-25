@@ -41,8 +41,8 @@ int main(void)
     hw.Configure();
     hw.Init();
     InitGPIO();
-    //MidiUsbHandler::Config midi_cfg;
-    //midi.Init(midi_cfg);
+    MidiUsbHandler::Config midi_cfg;
+    midi.Init(midi_cfg);
     //hw.StartLog(false);
 
     uint8_t button_cnt = 0;
