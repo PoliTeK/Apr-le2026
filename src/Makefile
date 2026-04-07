@@ -5,7 +5,7 @@ TARGET = main
 
 # Sources
 
-CPP_SOURCES = main.cpp 
+CPP_SOURCES = main.cpp IIR/iir.cpp 
 
 # Library Locations
 LIBDAISY_DIR = ../libDaisy
